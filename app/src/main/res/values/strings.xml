@@ -4,4 +4,9 @@
     <string name="enter_password">Enter password</string>
     <string name="login">Log in</string>
     <string name="this_field_cannot_be_empty">This field cannot be empty!</string>
+    <string name="title_activity_todo_list">TODOEkspert</string>
+    <string name="action_add">Add TODO</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_logout">Logout</string>
+    <string name="content_too_short">Content too short!</string>
 </resources>

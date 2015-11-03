@@ -1,5 +1,6 @@
 package com.adaptris.todoekspert;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -77,15 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         AsyncTask<String, Integer, Boolean> asyncTask = new AsyncTask<String, Integer, Boolean>() {
             @Override
             protected Boolean doInBackground(String... params) {
-                try {
-                    for (int i = 0; i < 100; i++) {
-                        Thread.sleep(50);
-                        publishProgress(i);
-                    }
 
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 return "test".equals(params[0]) && "test".equals(params[1]);
             }
 
@@ -112,6 +105,9 @@ public class LoginActivity extends AppCompatActivity {
                     loginButton.setText("Finished");
                     finish();
                     Log.d(LOG_TAG, "Finished:" + LoginActivity.this);
+
+                    Intent intent = new Intent(getApplicationContext(), TodoListActivity.class);
+                    startActivity(intent);
                 }
 
 
