@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="enter_password">Wprowadź hasło</string>
+    <string name="enter_username">Wprowadź nazwę użytkownika</string>
+    <string name="login">Zaloguj</string>
+    <string name="this_field_cannot_be_empty">To pole nie może być puste!</string>
+</resources>

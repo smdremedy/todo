@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="green">#23ca81</color>
+    <color name="purple">#04264e</color>
+
+    <color name="colorPrimary">@color/purple</color>
+    <color name="colorPrimaryDark">#012141</color>
+    <color name="colorAccent">@color/green</color>
+
+
+</resources>

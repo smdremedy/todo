@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name" translatable="false">TODOEkspert</string>
+    <string name="enter_username">Enter username</string>
+    <string name="enter_password">Enter password</string>
+    <string name="login">Log in</string>
+    <string name="this_field_cannot_be_empty">This field cannot be empty!</string>
+</resources>
