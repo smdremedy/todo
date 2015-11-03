@@ -9,9 +9,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import com.google.gson.GsonBuilder;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.converter.GsonConverter;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -73,13 +78,32 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    private void login(String username, String password) {
+    private void login(String username, final String password) {
 
-        AsyncTask<String, Integer, Boolean> asyncTask = new AsyncTask<String, Integer, Boolean>() {
+        AsyncTask<String, Integer, LoginResponse> asyncTask = new AsyncTask<String, Integer, LoginResponse>() {
             @Override
-            protected Boolean doInBackground(String... params) {
+            protected LoginResponse doInBackground(String... params) {
 
-                return "test".equals(params[0]) && "test".equals(params[1]);
+                RestAdapter.Builder builder = new RestAdapter.Builder();
+                builder.setEndpoint("https://api.parse.com/1");
+                builder.setLogLevel(RestAdapter.LogLevel.FULL);
+                GsonBuilder gsonBuilder = new GsonBuilder();
+                gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                builder.setConverter(new GsonConverter(gsonBuilder.create()));
+                RestAdapter adapter = builder.build();
+                ParseTodoService service = adapter.create(ParseTodoService.class);
+
+                try {
+                    LoginResponse loginResponse = service.login(params[0], params[1]);
+                    Log.d(LOG_TAG, "Response in POJO:" + loginResponse.toString());
+                    return loginResponse;
+
+                } catch (RetrofitError error) {
+                    Log.e(LOG_TAG, "Error:" + error);
+
+                }
+
+                return null;
             }
 
             @Override
@@ -97,11 +121,11 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            protected void onPostExecute(Boolean result) {
+            protected void onPostExecute(LoginResponse result) {
                 super.onPostExecute(result);
                 loginButton.setEnabled(true);
                 Log.d(LOG_TAG, "Result:" + result);
-                if(result) {
+                if(result != null) {
                     loginButton.setText("Finished");
                     finish();
                     Log.d(LOG_TAG, "Finished:" + LoginActivity.this);
