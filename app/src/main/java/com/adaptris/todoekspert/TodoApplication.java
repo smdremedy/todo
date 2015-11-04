@@ -20,7 +20,7 @@ public class TodoApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        com.adaptris.todoekspert.DaggerTodoComponent.builder();
+        DaggerTodoComponent.builder()
 
         loginManager = new LoginManager(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
     }
