@@ -10,5 +10,7 @@ public interface TodoComponent {
     void inject(LoginActivity loginActivity);
     void inject(TodoListActivity todoListActivity);
 
+    void inject(RefreshIntentService refreshIntentService);
+
     LoginManager getLoginManager();
 }

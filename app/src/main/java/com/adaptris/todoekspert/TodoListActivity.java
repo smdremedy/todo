@@ -155,23 +155,23 @@ public class TodoListActivity extends AppCompatActivity {
 
     private void refreshList() {
 
+        Intent intent = new Intent(this, RefreshIntentService.class);
+        startService(intent);
 
-        parseTodoService.getTodos(loginManager.getToken(), new Callback<GetTodosResponse>() {
-            @Override
-            public void success(GetTodosResponse getTodosResponse, Response response) {
-                for(Todo todo : getTodosResponse.results) {
-                    Timber.d("TODO:" + todo);
-                    todoDao.insertOrUpdate(todo);
-                }
-                refreshCursor();
-                Snackbar.make(todoListView, "Refreshed", Snackbar.LENGTH_SHORT).show();
-            }
 
-            @Override
-            public void failure(RetrofitError error) {
-                Timber.e(error, "Cannot get Todos");
-            }
-        });
+//        parseTodoService.getTodos(loginManager.getToken(), new Callback<GetTodosResponse>() {
+//            @Override
+//            public void success(GetTodosResponse getTodosResponse, Response response) {
+
+//                refreshCursor();
+//                Snackbar.make(todoListView, "Refreshed", Snackbar.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void failure(RetrofitError error) {
+//                Timber.e(error, "Cannot get Todos");
+//            }
+//        });
     }
 
     @Override
