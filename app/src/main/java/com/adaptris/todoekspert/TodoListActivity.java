@@ -13,12 +13,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.Timer;
 
 import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import retrofit.RetrofitError;
+import timber.log.Timber;
 
 public class TodoListActivity extends AppCompatActivity {
 
@@ -36,6 +44,10 @@ public class TodoListActivity extends AppCompatActivity {
 
     @Inject
     LoginManager loginManager;
+
+    @Inject
+    ParseTodoService parseTodoService;
+    private ArrayAdapter<Todo> arrayAdapter;
 
 
     @Override
@@ -64,6 +76,23 @@ public class TodoListActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        arrayAdapter = new ArrayAdapter<Todo>(this, R.layout.todo_list_item, R.id.itemCheckBox) {
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                CheckBox checkBox = (CheckBox) view.findViewById(R.id.itemCheckBox);
+                Todo todo = getItem(position);
+
+                checkBox.setChecked(todo.isDone());
+                checkBox.setText(todo.getContent());
+
+                return view;
+            }
+
+        };
+
+        todoListView.setAdapter(arrayAdapter);
     }
 
     private void goToLogin() {
@@ -142,21 +171,27 @@ public class TodoListActivity extends AppCompatActivity {
         }
     }
 
-    class RefreshAsyncTask extends AsyncTask<Void, Void, Boolean> {
+    class RefreshAsyncTask extends AsyncTask<Void, Void, GetTodosResponse> {
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected GetTodosResponse doInBackground(Void... params) {
             try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                return parseTodoService.getTodos(loginManager.getToken());
+            } catch (RetrofitError error) {
+                Timber.e(error, "Cannot get Todos");
+                return null;
             }
-            return null;
         }
 
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
+        protected void onPostExecute(GetTodosResponse response) {
+            super.onPostExecute(response);
+
+            for(Todo todo : response.results) {
+                Timber.d("TODO:" + todo);
+            }
+            arrayAdapter.addAll(response.results);
+
             refreshAsyncTask = null;
 
             Snackbar.make(todoListView, "Refreshed", Snackbar.LENGTH_SHORT).show();

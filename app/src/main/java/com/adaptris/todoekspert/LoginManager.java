@@ -48,4 +48,7 @@ class LoginManager {
         return TextUtils.isEmpty(userId) || TextUtils.isEmpty(token);
     }
 
+    public String getToken() {
+        return token;
+    }
 }
