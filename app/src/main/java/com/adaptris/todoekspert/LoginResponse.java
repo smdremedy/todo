@@ -1,12 +1,12 @@
 package com.adaptris.todoekspert;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
 public class LoginResponse {
-
 
     @SerializedName("createdAt")
     @Expose

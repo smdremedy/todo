@@ -1,8 +1,10 @@
 package com.adaptris.todoekspert;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Button;
@@ -21,6 +23,8 @@ import retrofit.converter.GsonConverter;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = LoginActivity.class.getSimpleName();
+    public static final String TOKEN_PREFS_KEY = "token";
+    public static final String USER_ID_PREFS_KEY = "userId";
 
     @Bind(R.id.usernameEditText)
     EditText usernameEditText;
@@ -124,8 +128,17 @@ public class LoginActivity extends AppCompatActivity {
             protected void onPostExecute(LoginResponse result) {
                 super.onPostExecute(result);
                 loginButton.setEnabled(true);
+
                 Log.d(LOG_TAG, "Result:" + result);
                 if(result != null) {
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString(TOKEN_PREFS_KEY, result.getSessionToken());
+                    editor.putString(USER_ID_PREFS_KEY, result.getObjectId());
+
+                    editor.apply();
+
                     loginButton.setText("Finished");
                     finish();
                     Log.d(LOG_TAG, "Finished:" + LoginActivity.this);

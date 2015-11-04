@@ -2,8 +2,10 @@ package com.adaptris.todoekspert;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -32,10 +34,23 @@ public class TodoListActivity extends AppCompatActivity {
 
     private RefreshAsyncTask refreshAsyncTask = null;
 
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        preferences =
+                PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        String token = preferences.getString(LoginActivity.TOKEN_PREFS_KEY, "");
+        if(token.isEmpty()) {
+            goToLogin();
+            return;
+        }
+
+
+
         setContentView(R.layout.activity_todo_list);
         ButterKnife.bind(this);
 
@@ -48,6 +63,12 @@ public class TodoListActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    private void goToLogin() {
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -75,7 +96,12 @@ public class TodoListActivity extends AppCompatActivity {
                 builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        finish();
+
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.clear();
+                        editor.apply();
+
+                        goToLogin();
                     }
                 });
                 builder.setNegativeButton(android.R.string.no, null);
