@@ -2,10 +2,8 @@ package com.adaptris.todoekspert;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -33,18 +31,16 @@ public class TodoListActivity extends AppCompatActivity {
     FloatingActionButton fab;
 
     private RefreshAsyncTask refreshAsyncTask = null;
+    private LoginManager loginManager;
 
-    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        preferences =
-                PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        loginManager = ((TodoApplication)getApplication()).getLoginManager();
 
-        String token = preferences.getString(LoginActivity.TOKEN_PREFS_KEY, "");
-        if(token.isEmpty()) {
+        if(loginManager.hasToLogin()) {
             goToLogin();
             return;
         }
@@ -96,11 +92,7 @@ public class TodoListActivity extends AppCompatActivity {
                 builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.clear();
-                        editor.apply();
-
+                        loginManager.logout();
                         goToLogin();
                     }
                 });

@@ -1,10 +1,8 @@
 package com.adaptris.todoekspert;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Button;
@@ -12,6 +10,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import com.google.gson.GsonBuilder;
+
+import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -23,8 +23,6 @@ import retrofit.converter.GsonConverter;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = LoginActivity.class.getSimpleName();
-    public static final String TOKEN_PREFS_KEY = "token";
-    public static final String USER_ID_PREFS_KEY = "userId";
 
     @Bind(R.id.usernameEditText)
     EditText usernameEditText;
@@ -37,6 +35,12 @@ public class LoginActivity extends AppCompatActivity {
     @Bind(R.id.progressBar)
     ProgressBar progressBar;
 
+
+    @Inject
+    LoginManager loginManager;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,10 +48,17 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "onCreate:" + savedInstanceState);
         Log.d(LOG_TAG, "Started:" + this);
         ButterKnife.bind(this);
+
+
+
+
+
+
         if (BuildConfig.DEBUG) {
             usernameEditText.setText("test");
             passwordEditText.setText("test");
         }
+        loginManager = ((TodoApplication)getApplication()).getLoginManager();
     }
 
     @Override
@@ -132,19 +143,15 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "Result:" + result);
                 if(result != null) {
 
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putString(TOKEN_PREFS_KEY, result.getSessionToken());
-                    editor.putString(USER_ID_PREFS_KEY, result.getObjectId());
-
-                    editor.apply();
+                    loginManager.login(result.getObjectId(), result.getSessionToken());
 
                     loginButton.setText("Finished");
-                    finish();
+
                     Log.d(LOG_TAG, "Finished:" + LoginActivity.this);
 
                     Intent intent = new Intent(getApplicationContext(), TodoListActivity.class);
                     startActivity(intent);
+                    finish();
                 }
 
 
