@@ -6,22 +6,19 @@ import android.preference.PreferenceManager;
 public class TodoApplication extends Application {
 
 
-    private LoginManager loginManager;
-
-    public LoginManager getLoginManager() {
-        return loginManager;
+    public static TodoComponent getTodoComponent() {
+        return todoComponent;
     }
 
-
-
-
+    private static TodoComponent todoComponent;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        DaggerTodoComponent.builder()
+        todoComponent = DaggerTodoComponent.builder()
+                .todoModule(new TodoModule(this))
+                .build();
 
-        loginManager = new LoginManager(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
     }
 }

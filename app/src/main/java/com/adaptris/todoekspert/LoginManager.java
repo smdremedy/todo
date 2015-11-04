@@ -3,9 +3,10 @@ package com.adaptris.todoekspert;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
-/**
- * Created by Sylwester on 2015-11-04.
- */
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 class LoginManager {
 
     public static final String TOKEN_PREFS_KEY = "token";
@@ -17,6 +18,7 @@ class LoginManager {
 
     private SharedPreferences preferences;
 
+    @Inject
     public LoginManager(SharedPreferences preferences) {
         this.preferences = preferences;
 

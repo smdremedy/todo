@@ -49,16 +49,12 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "Started:" + this);
         ButterKnife.bind(this);
 
-
-
-
-
+        TodoApplication.getTodoComponent().inject(this);
 
         if (BuildConfig.DEBUG) {
             usernameEditText.setText("test");
             passwordEditText.setText("test");
         }
-        loginManager = ((TodoApplication)getApplication()).getLoginManager();
     }
 
     @Override

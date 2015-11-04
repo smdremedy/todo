@@ -15,6 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -31,14 +33,17 @@ public class TodoListActivity extends AppCompatActivity {
     FloatingActionButton fab;
 
     private RefreshAsyncTask refreshAsyncTask = null;
-    private LoginManager loginManager;
+
+    @Inject
+    LoginManager loginManager;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        loginManager = ((TodoApplication)getApplication()).getLoginManager();
+        TodoApplication.getTodoComponent().inject(this);
+
 
         if(loginManager.hasToLogin()) {
             goToLogin();
