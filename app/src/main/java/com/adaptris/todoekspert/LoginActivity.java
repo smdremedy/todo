@@ -39,6 +39,9 @@ public class LoginActivity extends AppCompatActivity {
     @Inject
     LoginManager loginManager;
 
+    @Inject
+    ParseTodoService parseTodoService;
+
 
 
     @Override
@@ -95,17 +98,10 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected LoginResponse doInBackground(String... params) {
 
-                RestAdapter.Builder builder = new RestAdapter.Builder();
-                builder.setEndpoint("https://api.parse.com/1");
-                builder.setLogLevel(RestAdapter.LogLevel.FULL);
-                GsonBuilder gsonBuilder = new GsonBuilder();
-                gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                builder.setConverter(new GsonConverter(gsonBuilder.create()));
-                RestAdapter adapter = builder.build();
-                ParseTodoService service = adapter.create(ParseTodoService.class);
+
 
                 try {
-                    LoginResponse loginResponse = service.login(params[0], params[1]);
+                    LoginResponse loginResponse = parseTodoService.login(params[0], params[1]);
                     Log.d(LOG_TAG, "Response in POJO:" + loginResponse.toString());
                     return loginResponse;
 

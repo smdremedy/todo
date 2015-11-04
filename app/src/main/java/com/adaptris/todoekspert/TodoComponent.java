@@ -9,4 +9,6 @@ import dagger.Component;
 public interface TodoComponent {
     void inject(LoginActivity loginActivity);
     void inject(TodoListActivity todoListActivity);
+
+    LoginManager getLoginManager();
 }

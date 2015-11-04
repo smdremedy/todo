@@ -6,7 +6,6 @@ import android.text.TextUtils;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-@Singleton
 class LoginManager {
 
     public static final String TOKEN_PREFS_KEY = "token";
@@ -18,7 +17,6 @@ class LoginManager {
 
     private SharedPreferences preferences;
 
-    @Inject
     public LoginManager(SharedPreferences preferences) {
         this.preferences = preferences;
 
