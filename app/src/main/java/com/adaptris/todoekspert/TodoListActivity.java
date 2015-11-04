@@ -10,16 +10,18 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.Timer;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -47,7 +49,73 @@ public class TodoListActivity extends AppCompatActivity {
 
     @Inject
     ParseTodoService parseTodoService;
-    private ArrayAdapter<Todo> arrayAdapter;
+
+    @Inject
+    TodoDao todoDao;
+
+    private TodoAdapter adapter;
+
+    class TodoAdapter extends BaseAdapter {
+
+        private List<Todo> todos = new ArrayList<>();
+        private final LayoutInflater from;
+
+        public TodoAdapter() {
+            from = LayoutInflater.from(TodoListActivity.this);
+        }
+
+        @Override
+        public int getCount() {
+            return todos.size();
+        }
+
+        @Override
+        public Todo getItem(int position) {
+            return todos.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Timber.d("Pos:" + position + " view:" + convertView);
+
+            View view = convertView;
+            if(view == null) {
+                view = (View) from.inflate(R.layout.todo_list_item, parent, false);
+            }
+
+            ViewHolder viewHolder = (ViewHolder) view.getTag();
+            if(viewHolder == null) {
+                viewHolder = new ViewHolder();
+                viewHolder.checkBox = (CheckBox) view.findViewById(R.id.itemCheckBox);
+                viewHolder.button = (Button) view.findViewById(R.id.itemButton);
+                view.setTag(viewHolder);
+
+            }
+
+            Todo todo = getItem(position);
+            viewHolder.checkBox.setText(todo.getContent());
+            viewHolder.checkBox.setChecked(todo.isDone());
+            viewHolder.button.setEnabled(todo.isDone());
+            return view;
+        }
+
+        public void addAll(List<Todo> results) {
+            todos.addAll(results);
+            notifyDataSetChanged();
+        }
+    }
+
+    class ViewHolder {
+        CheckBox checkBox;
+        Button button;
+    }
 
 
     @Override
@@ -76,23 +144,9 @@ public class TodoListActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        arrayAdapter = new ArrayAdapter<Todo>(this, R.layout.todo_list_item, R.id.itemCheckBox) {
+        adapter = new TodoAdapter();
 
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                CheckBox checkBox = (CheckBox) view.findViewById(R.id.itemCheckBox);
-                Todo todo = getItem(position);
-
-                checkBox.setChecked(todo.isDone());
-                checkBox.setText(todo.getContent());
-
-                return view;
-            }
-
-        };
-
-        todoListView.setAdapter(arrayAdapter);
+        todoListView.setAdapter(adapter);
     }
 
     private void goToLogin() {
@@ -189,8 +243,9 @@ public class TodoListActivity extends AppCompatActivity {
 
             for(Todo todo : response.results) {
                 Timber.d("TODO:" + todo);
+                todoDao.insertOrUpdate(todo);
             }
-            arrayAdapter.addAll(response.results);
+            adapter.addAll(response.results);
 
             refreshAsyncTask = null;
 
