@@ -39,9 +39,7 @@ public class AddTodoActivity extends AppCompatActivity {
         String content = contentEditText.getText().toString();
         if(content.length() > 4 ) {
             Intent data = new Intent();
-            Todo todo = new Todo();
-            todo.content = content;
-            todo.done = doneCheckBox.isChecked();
+            Todo todo = new Todo(content, doneCheckBox.isChecked());
             data.putExtra(TODO_EXTRA, todo);
             setResult(RESULT_OK, data);
             finish();

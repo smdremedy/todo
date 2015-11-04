@@ -4,42 +4,113 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by Sylwester on 2015-11-03.
  */
-public class Todo implements Parcelable {
+public class Todo implements Serializable {
 
-    public String content;
-    public boolean done;
+    public Todo(String content, boolean done) {
+        this.content = content;
+        this.done = done;
+    }
+
+
+    private String content;
+    private boolean done;
+
+
+    private Date createdAt;
+
+
+    private String objectId;
+    private Date updatedAt;
+    private User user;
+
+
+
+
+    public static class User {
+        private String objectId;
+
+
+        public String getObjectId() {
+            return objectId;
+        }
+
+
+        public void setObjectId(String objectId) {
+            this.objectId = objectId;
+        }
+    }
+
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+
+    public String getObjectId() {
+        return objectId;
+    }
+
+
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
+    }
+
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+
+    public User getUser() {
+        return user;
+    }
+
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+
+    public String getContent() {
+        return content;
+    }
+
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+
+    public boolean isDone() {
+        return done;
+    }
+
+
+    public void setDone(boolean done) {
+        this.done = done;
+    }
+
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeString(content);
-        out.writeByte((byte) (done ? 1 : 0));
-    }
-
-    public static final Parcelable.Creator<Todo> CREATOR
-            = new Parcelable.Creator<Todo>() {
-        public Todo createFromParcel(Parcel in) {
-            return new Todo(in);
-        }
-
-        public Todo[] newArray(int size) {
-            return new Todo[size];
-        }
-    };
-
-    public Todo() {
-
-    }
-
-    private Todo(Parcel in) {
-        content = in.readString();
-        done = in.readByte() > 0;
+    public String toString() {
+        return "Todo{" +
+                "content='" + content + '\'' +
+                ", done=" + done +
+                '}';
     }
 }

@@ -136,7 +136,7 @@ public class TodoListActivity extends AppCompatActivity {
             Todo todo = (Todo) data.getParcelableExtra(AddTodoActivity.TODO_EXTRA);
 
             Log.d(LOG_TAG, "Result:" + resultCode + " content:"
-                    + todo.content + " done: " + todo.done);
+                    + todo.getContent() + " done: " + todo.isDone());
             refreshList();
 
         }
