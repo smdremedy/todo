@@ -2,6 +2,7 @@ package com.adaptris.todoekspert;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -19,6 +20,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,9 @@ import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import retrofit.Callback;
 import retrofit.RetrofitError;
+import retrofit.client.Response;
 import timber.log.Timber;
 
 public class TodoListActivity extends AppCompatActivity {
@@ -42,7 +46,6 @@ public class TodoListActivity extends AppCompatActivity {
     @Bind(R.id.fab)
     FloatingActionButton fab;
 
-    private RefreshAsyncTask refreshAsyncTask = null;
 
     @Inject
     LoginManager loginManager;
@@ -53,88 +56,20 @@ public class TodoListActivity extends AppCompatActivity {
     @Inject
     TodoDao todoDao;
 
-    private TodoAdapter adapter;
-
-    class TodoAdapter extends BaseAdapter {
-
-        private List<Todo> todos = new ArrayList<>();
-        private final LayoutInflater from;
-
-        public TodoAdapter() {
-            from = LayoutInflater.from(TodoListActivity.this);
-        }
-
-        @Override
-        public int getCount() {
-            return todos.size();
-        }
-
-        @Override
-        public Todo getItem(int position) {
-            return todos.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Timber.d("Pos:" + position + " view:" + convertView);
-
-            View view = convertView;
-            if(view == null) {
-                view = (View) from.inflate(R.layout.todo_list_item, parent, false);
-            }
-
-            ViewHolder viewHolder = (ViewHolder) view.getTag();
-            if(viewHolder == null) {
-                viewHolder = new ViewHolder();
-                viewHolder.checkBox = (CheckBox) view.findViewById(R.id.itemCheckBox);
-                viewHolder.button = (Button) view.findViewById(R.id.itemButton);
-                view.setTag(viewHolder);
-
-            }
-
-            Todo todo = getItem(position);
-            viewHolder.checkBox.setText(todo.getContent());
-            viewHolder.checkBox.setChecked(todo.isDone());
-            viewHolder.button.setEnabled(todo.isDone());
-            return view;
-        }
-
-        public void addAll(List<Todo> results) {
-            todos.addAll(results);
-            notifyDataSetChanged();
-        }
-    }
-
-    class ViewHolder {
-        CheckBox checkBox;
-        Button button;
-    }
-
+    private SimpleCursorAdapter adapter;
+    private String[] from = new String[]{TodoDao.C_CONTENT, TodoDao.C_DONE};
+    private int[] to = new int[] {R.id.itemCheckBox, R.id.itemCheckBox};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         TodoApplication.getTodoComponent().inject(this);
-
-
         if(loginManager.hasToLogin()) {
             goToLogin();
             return;
         }
-
-
-
         setContentView(R.layout.activity_todo_list);
         ButterKnife.bind(this);
-
         setSupportActionBar(toolbar);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -144,9 +79,22 @@ public class TodoListActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        adapter = new TodoAdapter();
+        adapter = new SimpleCursorAdapter(this, R.layout.todo_list_item, null, from, to, 0);
 
+        adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                if(columnIndex == cursor.getColumnIndex(TodoDao.C_DONE)) {
+                    CheckBox checkBox = (CheckBox) view;
+                    checkBox.setChecked(cursor.getInt(columnIndex) > 0);
+                    return true;
+                }
+                return false;
+            }
+        });
         todoListView.setAdapter(adapter);
+        refreshCursor();
+
     }
 
     private void goToLogin() {
@@ -206,10 +154,24 @@ public class TodoListActivity extends AppCompatActivity {
     }
 
     private void refreshList() {
-        if(refreshAsyncTask == null) {
-            refreshAsyncTask = new RefreshAsyncTask();
-            refreshAsyncTask.execute();
-        }
+
+
+        parseTodoService.getTodos(loginManager.getToken(), new Callback<GetTodosResponse>() {
+            @Override
+            public void success(GetTodosResponse getTodosResponse, Response response) {
+                for(Todo todo : getTodosResponse.results) {
+                    Timber.d("TODO:" + todo);
+                    todoDao.insertOrUpdate(todo);
+                }
+                refreshCursor();
+                Snackbar.make(todoListView, "Refreshed", Snackbar.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Timber.e(error, "Cannot get Todos");
+            }
+        });
     }
 
     @Override
@@ -225,32 +187,12 @@ public class TodoListActivity extends AppCompatActivity {
         }
     }
 
-    class RefreshAsyncTask extends AsyncTask<Void, Void, GetTodosResponse> {
 
-        @Override
-        protected GetTodosResponse doInBackground(Void... params) {
-            try {
-                return parseTodoService.getTodos(loginManager.getToken());
-            } catch (RetrofitError error) {
-                Timber.e(error, "Cannot get Todos");
-                return null;
-            }
-        }
 
-        @Override
-        protected void onPostExecute(GetTodosResponse response) {
-            super.onPostExecute(response);
+    private void refreshCursor() {
+        Cursor cursor = todoDao.query(loginManager.getUserId(), true);
 
-            for(Todo todo : response.results) {
-                Timber.d("TODO:" + todo);
-                todoDao.insertOrUpdate(todo);
-            }
-            adapter.addAll(response.results);
-
-            refreshAsyncTask = null;
-
-            Snackbar.make(todoListView, "Refreshed", Snackbar.LENGTH_SHORT).show();
-        }
+        adapter.changeCursor(cursor);
     }
 
 }

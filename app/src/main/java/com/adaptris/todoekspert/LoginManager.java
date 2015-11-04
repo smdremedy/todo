@@ -51,4 +51,8 @@ class LoginManager {
     public String getToken() {
         return token;
     }
+
+    public String getUserId() {
+        return userId;
+    }
 }

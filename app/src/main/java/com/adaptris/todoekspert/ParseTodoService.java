@@ -1,5 +1,6 @@
 package com.adaptris.todoekspert;
 
+import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Header;
 import retrofit.http.Headers;
@@ -20,6 +21,6 @@ public interface ParseTodoService {
             "X-Parse-Revocable-Session: 1"
     })
     @GET("/classes/Todo")
-    GetTodosResponse getTodos(@Header("X-Parse-Session-Token") String token);
+    void getTodos(@Header("X-Parse-Session-Token") String token, Callback<GetTodosResponse> callback);
 
 }
